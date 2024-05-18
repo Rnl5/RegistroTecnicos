@@ -1,9 +1,11 @@
 package com.edu.ucne.registrotecnicos.presentation.tecnico
 
+import android.widget.Space
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,6 +16,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,110 +43,180 @@ var sueldoHoraVacio by  mutableStateOf(false)
 fun TecnicoScreen(
     viewModel: TecnicoViewModel,
 ) {
-    val tecnicos by viewModel.tecnicos.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     TecnicoBody(
-        onSaveTecnico = {tecnico ->
-            viewModel.saveTecnico(tecnico)
+        uiState = uiState,
+        onNombresChanged = viewModel::onNombresChanged,
+        onSueldoHoraChanged = viewModel::onSueldoHoraChanged,
+        onSaveTecnico = {
+            viewModel.saveTecnico()
         },
-        tecnicos = tecnicos
     )
 }
 
 
 @Composable
 fun TecnicoBody(
-    tecnicos: List<TecnicoEntity>,
-    onSaveTecnico: (TecnicoEntity) -> Unit
+    uiState: TecnicoUIState,
+    onNombresChanged: (String) -> Unit,
+    onSueldoHoraChanged:(String)-> Unit,
+    onSaveTecnico: () -> Unit
 ) {
-    var tecnicoId by remember { mutableStateOf("") }
-    var nombres by remember { mutableStateOf("") }
-    var sueldoHora by remember { mutableStateOf("") }
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
+                .padding(innerPadding)
                 .padding(8.dp)
         ) {
-            OutlinedTextField(
-                label = { Text(text = "Nombres") },
-                value = nombres,
-                onValueChange = { nombres = it },
-                modifier = Modifier.fillMaxWidth(),
-                isError = nombreTecnicoVacio || nombreTecnicoSinSimbolos || nombreTecnicoVacio
-            )
-
-            OutlinedTextField(
-                label = { Text(text = "Sueldo a pagar") },
-                value = sueldoHora,
-                onValueChange = { sueldoHora = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-                isError = sueldoHoraVacio
-            )
-
-            Spacer(modifier = Modifier.padding(2.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedButton(
-                    onClick = {
-                        tecnicoId = ""
-                        nombres = ""
-                        sueldoHora = ""
-                        nombreTecnicoVacio = false
-                        nombreTecnicoSinSimbolos = false
-                        nombreTecnicoGuardado = false
-                        sueldoHoraVacio = false
-                    }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "new button"
+
+                    OutlinedTextField(
+                        label = { Text(text = "Nombres") },
+                        value = uiState.nombres,
+                        onValueChange = onNombresChanged,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    Text(text = "Nuevo")
-                }
 
-                OutlinedButton(
-                    onClick = {
-                        if (Validar(
-                                TecnicoEntity(
-                                    tecnicoId = tecnicoId.toIntOrNull(),
-                                    nombres = nombres,
-                                    sueldoHora = sueldoHora.toDoubleOrNull()
-                                ),
-                            lTecnicos = tecnicos
-                            )
+                    OutlinedTextField(
+                        label = { Text(text = "Sueldo por hora") },
+                        value = uiState.sueldoHora.toString(),
+                        onValueChange = onSueldoHoraChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+
+                    Spacer(modifier = Modifier.padding(2.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        OutlinedButton(onClick = {
+                            }
+
                         ) {
-                            onSaveTecnico(
-                                TecnicoEntity(
-                                    tecnicoId = tecnicoId.toIntOrNull(),
-                                    nombres = nombres,
-                                    sueldoHora = sueldoHora.toDoubleOrNull()
-                                )
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "new button"
                             )
+                            Text(text = "Nuevo")
+                        }
 
-                            tecnicoId = ""
-                            nombres = ""
-                            sueldoHora = ""
+                        OutlinedButton(
+                            onClick = {
+                            onSaveTecnico()
+                        }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "save button"
+                            )
+                            Text(text = "Guardar")
                         }
                     }
-                ) {
-
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "save button"
-                    )
-                    Text(text = "Guardar")
                 }
             }
-
         }
     }
+
+
+//    var tecnicoId by remember { mutableStateOf("") }
+//    var nombres by remember { mutableStateOf("") }
+//    var sueldoHora by remember { mutableStateOf("") }
+//
+//    ElevatedCard(
+//        modifier = Modifier.fillMaxWidth()
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(8.dp)
+//        ) {
+//            OutlinedTextField(
+//                label = { Text(text = "Nombres") },
+//                value = nombres,
+//                onValueChange = { nombres = it },
+//                modifier = Modifier.fillMaxWidth(),
+//                isError = nombreTecnicoVacio || nombreTecnicoSinSimbolos || nombreTecnicoVacio
+//            )
+//
+//            OutlinedTextField(
+//                label = { Text(text = "Sueldo a pagar") },
+//                value = sueldoHora,
+//                onValueChange = { sueldoHora = it },
+//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+//                modifier = Modifier.fillMaxWidth(),
+//                isError = sueldoHoraVacio
+//            )
+//
+//            Spacer(modifier = Modifier.padding(2.dp))
+//
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceEvenly
+//            ) {
+//                OutlinedButton(
+//                    onClick = {
+//                        tecnicoId = ""
+//                        nombres = ""
+//                        sueldoHora = ""
+//                        nombreTecnicoVacio = false
+//                        nombreTecnicoSinSimbolos = false
+//                        nombreTecnicoGuardado = false
+//                        sueldoHoraVacio = false
+//                    }
+//                ) {
+//                    Icon(
+//                        imageVector = Icons.Default.Add,
+//                        contentDescription = "new button"
+//                    )
+//                    Text(text = "Nuevo")
+//                }
+//
+//                OutlinedButton(
+//                    onClick = {
+//                        if (Validar(
+//                                TecnicoEntity(
+//                                    tecnicoId = tecnicoId.toIntOrNull(),
+//                                    nombres = nombres,
+//                                    sueldoHora = sueldoHora.toDoubleOrNull()
+//                                ),
+//                            lTecnicos = tecnicos
+//                            )
+//                        ) {
+//                            onSaveTecnico(
+//                                TecnicoEntity(
+//                                    tecnicoId = tecnicoId.toIntOrNull(),
+//                                    nombres = nombres,
+//                                    sueldoHora = sueldoHora.toDoubleOrNull()
+//                                )
+//                            )
+//
+//                            tecnicoId = ""
+//                            nombres = ""
+//                            sueldoHora = ""
+//                        }
+//                    }
+//                ) {
+//
+//                    Icon(
+//                        imageVector = Icons.Default.Edit,
+//                        contentDescription = "save button"
+//                    )
+//                    Text(text = "Guardar")
+//                }
+//            }
+//
+//        }
+//    }
 }
 
 
@@ -162,8 +235,11 @@ fun Validar(tecnico: TecnicoEntity?, lTecnicos:List<TecnicoEntity>?): Boolean {
 private fun TecnicoPreview(){
     RegistroTecnicosTheme {
         TecnicoBody(
+            uiState = TecnicoUIState(),
             onSaveTecnico = {},
-            tecnicos = emptyList()
+            onNombresChanged = {},
+            onSueldoHoraChanged = {},
+//            tecnicos = emptyList()
         )
     }
 }

@@ -12,4 +12,6 @@ class TecnicoRepository(private val tecnicoDao: TecnicoDao) {
         tecnicoDao.delete(tecnico)
     }
 
+    suspend fun getTecnico(tecnicoId:Int) = tecnicoDao.find(tecnicoId)
+
 }

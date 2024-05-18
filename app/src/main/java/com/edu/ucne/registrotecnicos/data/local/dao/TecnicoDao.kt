@@ -21,7 +21,7 @@ interface TecnicoDao {
     """
     )
 
-    suspend fun fin(id:Int): TecnicoEntity?
+    suspend fun find(id:Int): TecnicoEntity?
 
     @Delete
     suspend fun delete(tecnico: TecnicoEntity)
