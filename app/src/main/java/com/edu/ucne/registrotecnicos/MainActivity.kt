@@ -33,9 +33,13 @@ import androidx.room.Room
 import com.edu.ucne.registrotecnicos.data.local.database.TecnicoDb
 import com.edu.ucne.registrotecnicos.data.local.entities.TecnicoEntity
 import com.edu.ucne.registrotecnicos.data.repository.TecnicoRepository
+import com.edu.ucne.registrotecnicos.data.repository.TipoTecnicoRepository
 import com.edu.ucne.registrotecnicos.presentation.tecnico.TecnicoListScreen
 import com.edu.ucne.registrotecnicos.presentation.tecnico.TecnicoScreen
 import com.edu.ucne.registrotecnicos.presentation.tecnico.TecnicoViewModel
+import com.edu.ucne.registrotecnicos.presentation.tipoTecnico.TipoTecnicoListScreen
+import com.edu.ucne.registrotecnicos.presentation.tipoTecnico.TipoTecnicoScreen
+import com.edu.ucne.registrotecnicos.presentation.tipoTecnico.TipoTecnicoViewModel
 import com.edu.ucne.registrotecnicos.ui.theme.RegistroTecnicosTheme
 import kotlinx.serialization.Serializable
 
@@ -53,6 +57,7 @@ class MainActivity : ComponentActivity() {
             .build()
 
         val repository = TecnicoRepository(tecnicoDb.tecnicoDao())
+        val tipoTecnicoRepository = TipoTecnicoRepository(tecnicoDb.tipoTecnicoDao())
         enableEdgeToEdge()
         setContent {
             RegistroTecnicosTheme {
@@ -61,11 +66,15 @@ class MainActivity : ComponentActivity() {
                 {
                     composable<Screen.TecnicoList> {
                         TecnicoListScreen(
-                            viewModel = viewModel { TecnicoViewModel(repository, 0) },
-
+                            viewModel = viewModel { TecnicoViewModel(repository, 0, tipoTecnicoRepository) },
                             onVerTecnico = {
                                 navController.navigate(Screen.Tecnico(it.tecnicoId ?: 0))
-                            })
+                            },
+                            navController = navController,
+                            onAgregarTecnico = {
+                                navController.navigate(Screen.Tecnico(0))
+                            }
+                        )
                     }
 
                     composable<Screen.Tecnico> {
@@ -73,9 +82,34 @@ class MainActivity : ComponentActivity() {
                         TecnicoScreen(viewModel = viewModel {
                             TecnicoViewModel(
                                 repository,
-                                args.tecnicoId
+                                args.tecnicoId,
+                                tipoTecnicoRepository
                             )
-                        })
+                        },
+                            navController = navController)
+                    }
+
+                    composable<Screen.TipoTecnico> {
+                        val args = it.toRoute<Screen.TipoTecnico>()
+                        TipoTecnicoScreen(viewModel = viewModel{
+                            TipoTecnicoViewModel(
+                                tipoTecnicoRepository,
+                                args.tipoTecnicoId
+                            ) },
+                            navController = navController )
+                    }
+
+                    composable<Screen.TipoTecnicoList> {
+                        TipoTecnicoListScreen(
+                            viewModel = viewModel{TipoTecnicoViewModel(tipoTecnicoRepository,0)},
+                            navController = navController,
+                            onVerTipoTecnico = {
+                                navController.navigate(Screen.TipoTecnico(it.tipoTecnicoId ?: 0))
+                            },
+                            onAgregarTipoTecnico = {
+                                navController.navigate(Screen.TipoTecnico(0))
+                            }
+                        )
                     }
                 }
             }
@@ -84,63 +118,20 @@ class MainActivity : ComponentActivity() {
 }
 
 
-//                        val args = it.toRoute<Screen.Tecnico>()
-//                        Box(modifier = Modifier.fillMaxSize(),
-//                            contentAlignment = Alignment.Center)
-//                        {
-//                            Text(text = "Estas viendo el ticket ${args.tecnicoId}")
-//
-//                            OutlinedButton(onClick = { navController.navigate(Screen.Tecnico)}) {
-//
-//                            }
-//
-//
-//                        }
-
-//TecnicoScreen(viewModel = viewModel)
-//}
-//}
-
-
-//                Surface {
-//                    val viewModel: TecnicoViewModel = viewModel(
-//                        factory = TecnicoViewModel.provideFactory(repository)
-//                    )
-//                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//
-//                        Column(
-//                            modifier = Modifier
-//                                .fillMaxSize()
-//                                .padding(innerPadding)
-//                                .padding(8.dp)
-//                        ) {
-//                            TecnicoScreen(viewModel = viewModel)
-//
-//                            TecnicoListScreen(
-//                                viewModel = viewModel,
-//                                onDeleteTecnico = { tecnico ->
-//                                    LaunchedEffect(Unit) {
-//                                        viewModel.deleteTecnico(tecnico)
-//                                    }
-//                                },
-//                                onVerTecnico = {}
-//                            )
-//                        }
-//                    }
-//                }
-//}
-//}
-//}
-//}
-
-
 sealed class Screen() {
     @Serializable
     object TecnicoList : Screen()
 
     @Serializable
     data class Tecnico(val tecnicoId: Int) : Screen()
+
+    @Serializable
+    object TipoTecnicoList: Screen()
+
+    @Serializable
+    data class TipoTecnico(val tipoTecnicoId: Int) : Screen()
 }
+
 
 @Preview(showBackground = true)
 @Composable
