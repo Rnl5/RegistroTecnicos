@@ -48,13 +48,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.edu.ucne.registrotecnicos.Screen
+//import com.edu.ucne.registrotecnicos.Screen
 import com.edu.ucne.registrotecnicos.data.local.entities.ServicioTecnicoEntity
 import com.edu.ucne.registrotecnicos.data.local.entities.TecnicoEntity
 import com.edu.ucne.registrotecnicos.presentation.components.Combobox
 import com.edu.ucne.registrotecnicos.ui.theme.RegistroTecnicosTheme
 import kotlinx.coroutines.launch
 import com.edu.ucne.registrotecnicos.presentation.components.TopAppBar
+import com.edu.ucne.registrotecnicos.presentation.navigation.Screen
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
