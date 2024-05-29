@@ -65,8 +65,7 @@ fun <T> Combobox(
 
 @Preview
 @Composable
-fun vista(
-
+fun vistaT(
 ) {
     val items = listOf(
         Tecnico(nombres = "Pedro", descripcion = "Redes"),
